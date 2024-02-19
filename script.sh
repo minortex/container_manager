@@ -53,7 +53,20 @@ case $action in
     find . -maxdepth 1 -mindepth 1 ! -name rootfs -exec mv {} ./rootfs \;
 
     # 创建config.json
-    runc spec;; 
+    runc spec
+
+    # 询问是否需要更改shell
+    echo "Do you want to change shell?(y/n)"
+    read input_chshell
+    if [[ $input_chshell == y || $input_chshell == Y ]]
+    then
+      echo "Input the shell you want to use."
+      read input_shell
+      jq "(.process.args[] | select(. == \"sh\")) |= \"$input_shell\"" config.json > temp.json
+      mv temp.json config.json
+    else
+      echo "Use /bin/sh as shell."
+    fi;;
   create )
     runc create --bundle $path $name ;;
   run )
